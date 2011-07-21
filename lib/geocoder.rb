@@ -15,7 +15,19 @@ module Geocoder
   def search(query)
     blank_query?(query) ? [] : lookup(query).search(query)
   end
-
+  
+  ##
+  # This hook ads posibility to use desired lookup.
+  #
+  def search_with_lookup query, lookup = nil
+    return search_without_lookup(query) unless lookup
+    old_lookup, Configuration.lookup = Configuration.lookup, lookup
+    search_without_lookup query
+  ensure
+    Configuration.lookup = old_lookup
+  end
+  alias_method_chain :search, :lookup
+  
   ##
   # Look up the coordinates of the given street or IP address.
   #

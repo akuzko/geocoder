@@ -119,9 +119,8 @@ module Geocoder::Store
         default_near_scope_options(latitude, longitude, radius, options).merge(
           :select => "#{options[:select] || '*'}, " +
             "#{distance} AS distance" +
-            (bearing ? ", #{bearing} AS bearing" : ""),
-          :having => "#{distance} <= #{radius}"
-        )
+            (bearing ? ", #{bearing} AS bearing" : "")
+        ).tap{ |opts| opts[:conditions][0] = "#{distance} <= #{radius} AND (#{opts[:conditions][0]})" }
       end
 
       ##
@@ -179,7 +178,6 @@ module Geocoder::Store
           conditions << obj.id
         end
         {
-          :group  => columns.map{ |c| "#{table_name}.#{c.name}" }.join(','),
           :order  => options[:order],
           :limit  => options[:limit],
           :offset => options[:offset],
